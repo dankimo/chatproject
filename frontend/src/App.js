@@ -1,8 +1,8 @@
-import Chat from './chat/chat';
-import Process from './process/process';
-import Home from './home/home';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-import './App.scss';
+import Chat from './Chat';
+import Process from './process/Process';
+import Home from './Home';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './app.scss';
 import React from 'react';
 import io from 'socket.io-client';
 
@@ -24,3 +24,20 @@ function Appmain(props) {
         </React.Fragment>
     )
 }
+
+function App() {
+    return (
+        <Router>
+            <div className='App'>
+                <Routes>
+                    <Route path='/'>
+                            <Home socket={socket} />
+                    </Route>
+                    <Route path='/chat/:roomname/:username' element={<Home/>} />
+                </Routes>
+            </div>
+        </Router>
+    )
+}
+
+export default App
