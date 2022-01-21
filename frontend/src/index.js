@@ -4,6 +4,7 @@ import App from './App';
 import rootReducers from './store/reducers/index';
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
+import './polyfill';
 
 const store = createStore(rootReducers);
 ReactDOM.render(

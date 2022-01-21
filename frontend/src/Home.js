@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './home.scss';
 import { Link } from 'react-router-dom';
 
-function Homepage({ socket }) {
+function Home({ socket }) {
     const [username, setusername] = useState('');
     const [roomname, setroomname] = useState('');
 
@@ -24,7 +24,7 @@ function Homepage({ socket }) {
                 onChange={(e) => setusername(e.target.value)}
             ></input>
              <input
-                placeholder="Input the room name"
+                placeholder="room"
                 value={roomname}
                 onChange={(e) => setroomname(e.target.value)}
             ></input>
@@ -35,4 +35,4 @@ function Homepage({ socket }) {
     );
 }
 
-export default Homepage;
+export default Home;

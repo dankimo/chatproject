@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socket = require('socket.io');
 const cors = require('cors');
+const { User } = require('./models');
 
 let app = express();
 app.use(cors());
@@ -20,6 +21,8 @@ io.on('connection', (socket) => {
                 username: tmpUser.username,
                 text: `Welcome ${tmpUser.username}`
             });
+            
+            socket.join(tmpUser.currentRoom);
 
             socket.broadcast.to(tmpUser.currentRoom).emit('message', {
                 userId: tmpUser.id,
@@ -34,6 +37,11 @@ io.on('connection', (socket) => {
         // get the user
         let tmpUser = User.getUser(socket.id);
 
+        if (!tmpUser) {
+            return;
+        }
+
+        console.log(text);
         io.to(tmpUser.currentRoom).emit('message', {
             userId: tmpUser.id,
             username: tmpUser.username,
@@ -52,9 +60,8 @@ io.on('connection', (socket) => {
                 username: user.username,
                 text: `${user.username} has left the room`,
             });
+            tmpUser.disconnect();
         }
-
-        tmpUser.disconnect();
     })
 })
 

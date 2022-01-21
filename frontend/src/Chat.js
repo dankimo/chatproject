@@ -1,10 +1,10 @@
 import './chat.scss'
 import { decrypt, encrypt } from './aes.js';
 import { process } from './store/actions/index';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-function Chat({ username, roomname, socket }) {
+function Chat({username, roomname, socket}) {
     const [text, setText] = useState('');
     const [messages, setMessages] = useState([]);
 
@@ -14,20 +14,26 @@ function Chat({ username, roomname, socket }) {
         dispatch(process(encrypt, msg, cipher));
     };
 
+    const stableDispatch = useCallback(dispatchProcess, [dispatch]) //assuming that it doesn't need to change
+
     useEffect(() => {
         socket.on('message', (data) => {
-             const ans = decrypt(data.text, data.usernawme);
-             dispatchProcess(false, ans, data.text);
-             console.log(ans);
-             let temp = messages;
-             temp.push({
-                 userId: data.UserId,
-                 username: data.username,
-                 text: ans
-             });
-             setMessages([...temp]);
+            console.log(data.text);
+            const ans = decrypt(data.text, data.usernawme);
+            stableDispatch(false, ans, data.text);
+            let temp = messages;
+            temp.push({
+                userId: data.UserId,
+                username: data.username,
+                text: ans
+            });
+            setMessages([...temp]);
         });
-    }, [socket]);
+
+        return () => {
+            socket.off('message')
+        }
+    }, [socket, stableDispatch, messages]);
 
     const sendData = () => {
         if (text !== '') {
@@ -44,8 +50,6 @@ function Chat({ username, roomname, socket }) {
     };
 
     useEffect(scrollToBottom, [messages]);
-
-    console.log(messages, 'mess');
 
     return ( 
         <div className='chat'>
@@ -80,7 +84,7 @@ function Chat({ username, roomname, socket }) {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyPress={(e) => {
-                        if (e.key == "Enter") {
+                        if (e.key === "Enter") {
                             sendData();
                         }
                     }}

@@ -1,14 +1,15 @@
 class Room {
     static rooms = [];
     
-    constructor(roomName, roomPassword) {
+    constructor(roomName, roomPassword = null) {
         this.roomName = roomName;
         this.roomPassword = roomPassword;
-        if (rooms.find((room) => room.name === roomName)) {
+        if (Room.rooms.find((room) => room.name === roomName)) {
             this.users = room.users;
         }
         else {
             this.users = [];
+            Room.rooms.push(this);
         }
     }
 
@@ -21,7 +22,13 @@ class Room {
     }
 
     static findRoom(roomName) {
-       return rooms.find((room) => room.roomName === roomName)[0];
+       let room = Room.rooms.find((room) => room.roomName === roomName)?.[0];
+ 
+       if (!room) {
+            room = new Room(roomName);
+       }
+
+       return room;
     }
 }
 

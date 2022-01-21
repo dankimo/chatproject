@@ -1,3 +1,3 @@
-module.exports.user = require('./user');
+module.exports.User = require('./User');
 
-module.exports.room = require('./room');
+module.exports.Room = require('./Room');
