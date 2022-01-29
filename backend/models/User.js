@@ -14,17 +14,14 @@ class User {
 
     joinRoom(roomName, roomPassword) {
         const room = Room.findRoom(roomName);
-        // if (roomPassword === room.password) {
-        //     room.addUser(this);
-        //     this.currentRoom = roomName;
-        //     return true;
-        // }
-        // else {
-        //     return false;
-        // }
-        room.addUser(this);
-        this.currentRoom = roomName;
-        return true; 
+        if (roomPassword === room.password) {
+            room.addUser(this);
+            this.currentRoom = roomName;
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     disconnect() {

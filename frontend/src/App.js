@@ -6,6 +6,8 @@ import './app.scss';
 import React from 'react';
 import io from 'socket.io-client';
 import { key } from './aes'
+import { cookieParser } from 'cookie-parser';
+import ProtectedRoute from './ProtectedRoute';
 
 const socket = io();
 
@@ -33,7 +35,9 @@ function App() {
             <div className='App'>
                 <Routes>
                     <Route path='/' element={<Home socket={socket}/>}/>
+                    <ProtectedRoute path='/chat/:roomname/:username' element={<Appmain/>} />
                     <Route path='/chat/:roomname/:username' element={<Appmain/>}/>
+                    <Route path='*' element={() => "404 NOT FOUND"} />
                 </Routes>
             </div>
         </Router>
