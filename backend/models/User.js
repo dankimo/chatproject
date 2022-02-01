@@ -1,4 +1,4 @@
-const { Room } = require('./Room')
+const Room = require('./Room')
 
 class User {
     static users = [];

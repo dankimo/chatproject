@@ -1,3 +1,6 @@
+var crypto = require('crypto');
+var aes = require('./../aes');
+
 class Room {
     static rooms = [];
     
@@ -9,6 +12,9 @@ class Room {
         }
         else {
             this.users = [];
+            this.key = crypto.randomBytes(32),
+            this.iv = crypto.randomBytes(16);
+            this.aes = new aes(this.key, this.iv);
             Room.rooms.push(this);
         }
     }
@@ -19,6 +25,10 @@ class Room {
 
     removeUser(user) {
         this.user = this.users.filter((tmpUser) => tmpUser.id !== user.id)
+        // if all users are gone, remove the room from list of rooms
+        if (this.users.length === 0) {
+            Room.rooms = Room.rooms.filter(room => room.roomName === this.roomName);
+        }
     }
 
     static findRoom(roomName) {
@@ -32,4 +42,4 @@ class Room {
     }
 }
 
-module.exports = { Room };
+module.exports = Room;

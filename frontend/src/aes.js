@@ -1,16 +1,14 @@
 var crypto = require("crypto"),
-    algorithm = 'aes-256-cbc',
-    key = crypto.randomBytes(32),
-    iv = crypto.randomBytes(16);
+    algorithm = 'aes-256-cbc';
 
-export const encrypt = (text) => {
+export const encrypt = (text, key, iv) => {
     const cipher = crypto.createCipheriv(algorithm, key, iv);
     const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 
     return encrypted.toString('hex')
 };
 
-export const decrypt = (cipher, username) => {
+export const decrypt = (cipher, username, key, iv) => {
     if (cipher.startsWith("Welcome")) {
       return cipher;
     }
@@ -25,5 +23,3 @@ export const decrypt = (cipher, username) => {
 
     return dec;
 };
-
-export { key };

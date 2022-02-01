@@ -2,10 +2,14 @@ const express = require('express');
 const http = require('http');
 const socket = require('socket.io');
 const cors = require('cors');
-const { User } = require('./models');
+const jwt = require('jsonwebtoken');
+const { User, Room } = require('./models');
+const e = require('express');
+const aes = require('./aes')
 
 let app = express();
 app.use(cors());
+app.use(express.json());
 
 let server = http.Server(app);
 let io = socket(server);
@@ -13,21 +17,42 @@ let io = socket(server);
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on('joinRoom' , ({ username, roomname, roompassword }) => {
-        let tmpUser = new User(socket.id, username);
-        if (tmpUser.joinRoom(roomname, roompassword)) {
-            socket.emit('message', {
-                userId: tmpUser.id,
-                username: tmpUser.username,
-                text: `Welcome ${tmpUser.username}`
-            });
-            
-            socket.join(tmpUser.currentRoom);
+    // check jwt to see if user can actually join the room
+    socket.on('joinRoom' , ({ token, username, roomname }) => {
+        if (token) {
+            jwt.verify(token, 'secret secret', (err, decodedToken) => {
+                if (err) {
+                    console.log(err);
+                } else {
+                    let tmpUser = new User(socket.id, username);
+                    tmpUser.currentRoom = roomname;
 
-            socket.broadcast.to(tmpUser.currentRoom).emit('message', {
-                userId: tmpUser.id,
-                username: tmpUser.username,
-                text: `${tmpUser.username} has joined the chat`
+                    let room = Room.findRoom(roomname);
+                    let key = room.key;
+                    let iv = room.iv;
+
+                    socket.emit('roomdetails', {
+                        key: key,
+                        iv: iv
+                    })
+
+                    socket.emit('message', {
+                        userId: tmpUser.id,
+                        username: tmpUser.username,
+                        text: `Welcome ${tmpUser.username}`
+                    });
+                    
+                    console.log(tmpUser.currentRoom);
+
+                    tmpUser.joinRoom(roomname);
+                    socket.join(tmpUser.currentRoom);
+           
+                    socket.broadcast.to(tmpUser.currentRoom).emit('message', {
+                        userId: tmpUser.id,
+                        username: tmpUser.username,
+                        text: `${tmpUser.username} has joined the chat`
+                    });
+                }
             });
         }
     });
@@ -41,7 +66,6 @@ io.on('connection', (socket) => {
             return;
         }
 
-        console.log(text);
         io.to(tmpUser.currentRoom).emit('message', {
             userId: tmpUser.id,
             username: tmpUser.username,
@@ -57,12 +81,41 @@ io.on('connection', (socket) => {
         if (tmpUser) {
             io.to(tmpUser.currentRoom).emit('message', {
                 userId: tmpUser.id,
-                username: user.username,
-                text: `${user.username} has left the room`,
+                username: tmpUser.username,
+                text: `${tmpUser.username} has left the room`,
             });
             tmpUser.disconnect();
         }
     })
+})
+
+const maxAge = 24 * 60 * 60;
+const createToken = (username, roomname) => {
+    return jwt.sign({ username, roomname }, 'secret secret', {
+        expiresIn: maxAge
+    });
+}
+
+app.use('/auth', (req, res) => {
+    let { username, roomname, roompassword } = req.body;
+
+    let room = Room.findRoom(roomname);
+
+    // if the room already exists
+    if (room.roomPassword) {
+        if (roompassword === room.roomPassword)
+        {
+            const token = createToken(username, roomname);
+            res.cookie('jwt', token, { maxAge: maxAge * 1000 });
+        }
+        res.status(400).json({error: 'Incorrect room password.'})
+    }
+    else {
+        room.roomPassword = roompassword;
+        const token = createToken(username, roomname);
+        res.cookie('jwt', token, { maxAge: maxAge * 1000 });
+        res.status(200).send();
+    }
 })
 
 const PORT = 8000;

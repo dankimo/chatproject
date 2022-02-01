@@ -1,18 +1,41 @@
 import React, { useState } from 'react';
 import './home.scss';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import cookies from "js-cookies";
 
 function Home({ socket }) {
     const [username, setusername] = useState('');
     const [roomname, setroomname] = useState('');
     const [roompassword, setroompassword] = useState('');
+    const [error, seterror] = useState('');
+    
+    let navigate = useNavigate();
 
-    const sendData = () => {
-        if (username !== '' && roomname !== '') {
-            socket.emit('joinRoom', { username, roomname });
-        } else {
-            alert('username and roomname are required');
-            window.location.reload();
+    const sendData = async () => {
+        // if (username !== '' && roomname !== '') {
+        //     socket.emit('joinRoom', { username, roomname });
+        // } else {
+        //     alert('username and roomname are required');
+        //     window.location.reload();
+        // }
+        if (username !== '' && roomname !== '' && roompassword !== '') {
+            const res = await fetch('/auth', {
+                method: 'POST',
+                body: JSON.stringify({ username, roomname, roompassword }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.ok && window) {
+                var token = cookies.getItem('jwt');
+                socket.emit('joinRoom', { token, username, roomname })
+                navigate(`/chat/${roomname}`)
+            }
+            else {
+                const data = await res.json();
+                if (data.errorMessage) {
+                    seterror(data.errorMessage);
+                }
+            } 
         }
     };
 
@@ -25,7 +48,6 @@ function Home({ socket }) {
                     value={username}
                     onChange={(e) => setusername(e.target.value)}
                 ></input>
-                {/*<p className="tooltiptext">Enter a username.</p>*/}
             </div>
             <div className="tooltip">
                 <input
@@ -46,11 +68,9 @@ function Home({ socket }) {
                 <p className="tooltiptext">
                     Enter the room password. If nobody is in the room already, the room password will be set to your input.
                 </p>
+                <span className="error">{error}</span>
              </div>
-            <Link to={`/chat/${roomname}/${username}`}>
-                <button onClick={sendData}>Join</button>
-            </Link>
-            <p id="error">Invalid room-password for already-existing room.</p>
+            <button onClick={sendData}>Join</button>
         </div>
     );
 }
