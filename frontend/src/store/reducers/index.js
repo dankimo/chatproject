@@ -1,8 +1,2 @@
-import { ProcessReducer } from './process';
-import { combineReducers } from 'redux';
-
-const rootReducers = combineReducers({
-    ProcessReducer: ProcessReducer,
-});
-
-export default rootReducers;
+export { ProcessReducer as process } from './process';
+export { SetKeyReducer as setkey } from './setkey';

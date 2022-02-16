@@ -7,7 +7,7 @@ function Home({ socket }) {
     const [username, setusername] = useState('');
     const [roomname, setroomname] = useState('');
     const [roompassword, setroompassword] = useState('');
-    const [error, seterror] = useState('');
+    const [error, seterror] = useState('error');
     
     let navigate = useNavigate();
 
@@ -32,8 +32,12 @@ function Home({ socket }) {
             }
             else {
                 const data = await res.json();
-                if (data.errorMessage) {
-                    seterror(data.errorMessage);
+                if (data.error) {
+                    seterror(data.error);
+                    document.querySelector(".error").style.display = "block";
+                }
+                else {
+                    console.log('no error message included')
                 }
             } 
         }
@@ -68,8 +72,8 @@ function Home({ socket }) {
                 <p className="tooltiptext">
                     Enter the room password. If nobody is in the room already, the room password will be set to your input.
                 </p>
-                <span className="error">{error}</span>
              </div>
+             <p className="error">{error}</p>
             <button onClick={sendData}>Join</button>
         </div>
     );

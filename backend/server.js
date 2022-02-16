@@ -5,7 +5,6 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { User, Room } = require('./models');
 const e = require('express');
-const aes = require('./aes')
 
 let app = express();
 app.use(cors());
@@ -32,8 +31,8 @@ io.on('connection', (socket) => {
                     let iv = room.iv;
 
                     socket.emit('roomdetails', {
-                        key: key,
-                        iv: iv
+                        key: key.toString('hex'),
+                        iv: iv.toString('hex')
                     })
 
                     socket.emit('message', {
@@ -101,14 +100,22 @@ app.use('/auth', (req, res) => {
 
     let room = Room.findRoom(roomname);
 
+    if (room.userAlreadyExists(username)) {
+        res.status(400).json({error: 'User already in room with that username. Please choose another name.'});
+        return;
+    }
+
     // if the room already exists
     if (room.roomPassword) {
         if (roompassword === room.roomPassword)
         {
             const token = createToken(username, roomname);
             res.cookie('jwt', token, { maxAge: maxAge * 1000 });
+            res.status(200).send();
         }
-        res.status(400).json({error: 'Incorrect room password.'})
+        else {
+            res.status(400).json({error: 'Incorrect room password.'})
+        }
     }
     else {
         room.roomPassword = roompassword;

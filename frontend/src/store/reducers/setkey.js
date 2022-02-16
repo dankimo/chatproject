@@ -1,10 +1,10 @@
-function ProcessReducer(state = {}, action) {
+function SetKeyReducer(state = {}, action) {
     switch (action.type) {
-        case 'PROCESS':
+        case 'SET_KEY':
             return {...action.payload};
         default:
             return state;
     }
 }
 
-export { ProcessReducer };
+export { SetKeyReducer };

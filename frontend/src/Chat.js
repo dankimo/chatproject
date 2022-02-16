@@ -1,6 +1,6 @@
 import './chat.scss'
-import { decrypt, encrypt } from '../../backend/aes.js';
-import { process } from './store/actions/index';
+import { decrypt, encrypt } from './aes.js';
+import { process, setkey } from './store/actions/index';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -16,13 +16,18 @@ function Chat({username, roomname, socket}) {
         dispatch(process(encrypt, msg, cipher));
     };
 
-    const stableDispatch = useCallback(dispatchProcess, [dispatch])
+    const dispatchSetKey = (key, iv) => {
+        dispatch(setkey(key, iv));
+    }
+
+    const stableDispatchProcess = useCallback(dispatchProcess, [dispatch])
+
+    const stableDispatchSetKey = useCallback(dispatchSetKey, [dispatch])
 
     useEffect(() => {
         socket.on('message', (data) => {
-            console.log(data.text);
             const ans = decrypt(data.text, data.username, key, iv);
-            stableDispatch(false, ans, data.text);
+            stableDispatchProcess(false, ans, data.text);
             let temp = messages;
             temp.push({
                 userId: data.UserId,
@@ -35,19 +40,19 @@ function Chat({username, roomname, socket}) {
         return () => {
             socket.off('message')
         }
-    }, [socket, stableDispatch, messages, iv, key]);
+    }, [socket, stableDispatchProcess, messages, iv, key]);
 
     useEffect(() => {
         socket.on('roomdetails', (data) => {
-            console.log(data);
             setKey(data.key);
             setIv(data.iv);
+            stableDispatchSetKey(data.key, data.iv)
         });
 
         return () => {
-            socket.off('message')
+            socket.off('roomdetails')
         }
-    }, [socket, stableDispatch, messages]);
+    }, [socket, stableDispatchSetKey, key, iv]);
 
     const sendData = () => {
         if (text !== '') {

@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-
 import './app.scss';
 import React from 'react';
 import io from 'socket.io-client';
-import { key } from './aes'
 import  { ProtectedRoute } from './ProtectedRoute';
 
 const socket = io();
@@ -22,7 +21,7 @@ function Appmain(props) {
                 />
             </div>
             <div className='right'>
-                <Process secret={key}/>
+                <Process/>
             </div>
         </React.Fragment>
     )
@@ -33,9 +32,9 @@ function App() {
         <Router>
             <div className='App'>
                 <Routes>
-                    <Route path='/' element={<Home socket={socket}/>}/>
+                    <Route path='/' element={<Home socket={socket}/>} />
                     {/*<ProtectedRoute path='/chat/:roomname/' element={<Appmain/>} />*/}
-                    <Route path='/chat/:roomname/' element={<Appmain/>}/>
+                    <Route path='/chat/:roomname/' element={<Appmain />} />
                     <Route path='*' element={<h2>404 NOT FOUND</h2>} />
                 </Routes>
             </div>

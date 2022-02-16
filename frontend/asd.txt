@@ -1,0 +1,25 @@
+in home.js, need to change socket.emit to a post request
+
+then handle that in backend
+
+if password is correct join the user (socket)
+
+or if the user is already in a room just redirect them to room page
+
+when user leaves room (leave room button) remove the jwt
+
+todo: add authentication
+
+add css tooltips on homepage
+
+auth -> check roomname + password then issue jwt
+
+then redirect to chat page
+
+emit joinroom with jwt
+
+check jwt is valid
+
+if yes -> subscribe
+
+if no -> socket.emit error message

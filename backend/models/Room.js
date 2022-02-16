@@ -1,5 +1,4 @@
 var crypto = require('crypto');
-var aes = require('./../aes');
 
 class Room {
     static rooms = [];
@@ -7,20 +6,31 @@ class Room {
     constructor(roomName, roomPassword = null) {
         this.roomName = roomName;
         this.roomPassword = roomPassword;
-        if (Room.rooms.find((room) => room.name === roomName)) {
+        if (Room.rooms.find((room) => {
+            return room.name === roomName
+        }
+        )) {
             this.users = room.users;
         }
         else {
             this.users = [];
-            this.key = crypto.randomBytes(32),
+            this.key = crypto.randomBytes(32);
             this.iv = crypto.randomBytes(16);
-            this.aes = new aes(this.key, this.iv);
             Room.rooms.push(this);
         }
     }
 
     addUser(user) {
         this.users.push(user);
+    }
+
+    userAlreadyExists(username) {
+        if (this.users.find(user => user.username === username)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     removeUser(user) {
@@ -32,9 +42,10 @@ class Room {
     }
 
     static findRoom(roomName) {
-       let room = Room.rooms.find((room) => room.roomName === roomName)?.[0];
+       let room = Room.rooms.find(room => room.roomName === roomName);
  
        if (!room) {
+            console.log('created new room ' + roomName)
             room = new Room(roomName);
        }
 
