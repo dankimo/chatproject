@@ -6,7 +6,6 @@ import './app.scss';
 import React from 'react';
 import io from 'socket.io-client';
 import  { ProtectedRoute } from './ProtectedRoute';
-
 const socket = io();
 
 function Appmain(props) {
@@ -33,8 +32,14 @@ function App() {
             <div className='App'>
                 <Routes>
                     <Route path='/' element={<Home socket={socket}/>} />
-                    {/*<ProtectedRoute path='/chat/:roomname/' element={<Appmain/>} />*/}
-                    <Route path='/chat/:roomname/' element={<Appmain />} />
+                    <Route
+                        path='/chat/:roomname/'
+                        element={
+                            <ProtectedRoute>
+                                <Appmain/>
+                            </ProtectedRoute>
+                        }
+                    />
                     <Route path='*' element={<h2>404 NOT FOUND</h2>} />
                 </Routes>
             </div>

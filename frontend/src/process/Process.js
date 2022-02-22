@@ -1,9 +1,7 @@
 import './process.scss'
-import { useSelector } from "react-redux";
 import { connect } from 'react-redux';
 
 function Process(props) {
-    console.log(props);
     return (
         <div className="process">
             <h5>

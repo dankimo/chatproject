@@ -110,7 +110,8 @@ app.use('/auth', (req, res) => {
         if (roompassword === room.roomPassword)
         {
             const token = createToken(username, roomname);
-            res.cookie('jwt', token, { maxAge: maxAge * 1000 });
+            res.clearCookie('jwt');
+            res.cookie('jwt', token, { maxAge: maxAge * 1000 })
             res.status(200).send();
         }
         else {
@@ -119,11 +120,27 @@ app.use('/auth', (req, res) => {
     }
     else {
         room.roomPassword = roompassword;
+        res.clearCookie('jwt');
         const token = createToken(username, roomname);
         res.cookie('jwt', token, { maxAge: maxAge * 1000 });
         res.status(200).send();
     }
 })
+
+app.use('/verify', (req, res) => {
+    let token = req.body.token;
+
+    console.log(req.cookie)
+
+    if (token) {
+        jwt.verify(token, 'secret secret', (err, decodedToken) => {
+            if (!err) {
+                res.status(200).send();
+            }
+        })
+    }
+    res.status(400).send();
+});
 
 const PORT = 8000;
 server.listen(PORT, () => {
