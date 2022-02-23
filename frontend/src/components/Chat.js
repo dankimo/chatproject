@@ -1,6 +1,6 @@
 import './chat.scss'
-import { decrypt, encrypt } from './aes.js';
-import { process, setkey } from './store/actions/index';
+import { decrypt, encrypt } from '../aes.js';
+import { process, setkey } from '../store/actions/index';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 

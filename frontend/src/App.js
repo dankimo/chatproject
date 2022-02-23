@@ -1,6 +1,6 @@
-import Chat from './Chat';
-import Process from './process/Process';
-import Home from './Home';
+import Chat from './components/Chat';
+import Process from './components/Process';
+import Home from './components/Home';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import './app.scss';
 import React from 'react';
